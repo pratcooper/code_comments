@@ -53,11 +53,13 @@ public class TestMain
 	LinkedList<String> externalDictionaries = new LinkedList<String>();
     
     IndexLucene targetSystemData = (IndexLucene)IndexFactory.createIndex(outputTestSet, externalDictionaries, rootProject, pathStopWordsTestSet, pathAcronymsFile, pathAbbreviationsFile, extensionIndexingFile, IndexFactory.ALL);
+    System.out.println("-------------------------try to clear indexing for targetCode and Comment--------------------------------");
   	targetSystemData.deleteIndex();
+    System.out.println("-------------------------Add as a new index--------------------------------");
   	targetSystemData = (IndexLucene)IndexFactory.createIndex(outputTestSet, externalDictionaries, rootProject, pathStopWordsTestSet, pathAcronymsFile, pathAbbreviationsFile, extensionIndexingFile, IndexFactory.ALL);
 
 	//System.out.println("All words: "+targetSystemData.getAllWord());
-	CompositeSplit splitter = SplitTokenModuleFactory.createPatternMatchingSplittingModule();
+	// CompositeSplit splitter = SplitTokenModuleFactory.createPatternMatchingSplittingModule();
    
     List<String> allFile = targetSystemData.getAllIndexedFiles();
     System.out.println("DEBUG --> Index exists: "+allFile.toString());
@@ -67,7 +69,7 @@ public class TestMain
       System.exit(-1);
     }
 
- //    System.out.println("--------------------------------------------------------------------");
+    System.out.println("-------------------------try to clear indexing for splitter--------------------------------");
  //    String pathStopWords = "/Users/Kamonphop/Desktop/Research_Phd/DR/code-coherence-analysis/linsen/ConfigurationFiles/StopWord.txt";
 	// String outputIndex = "/Users/Kamonphop/Desktop/Research_Phd/DR/code-coherence-analysis/linsen/ConfigurationFiles/Structure/COFFEEMAKER/Dictionary/";
 	// String dictionaries = "/Users/Kamonphop/Desktop/Research_Phd/DR/code-coherence-analysis/linsen/ConfigurationFiles/Informatics.txt;/Users/Kamonphop/Desktop/Research_Phd/DR/code-coherence-analysis/linsen/ConfigurationFiles/English.txt";
@@ -75,6 +77,22 @@ public class TestMain
 	// String acronymsFilePath = "/Users/Kamonphop/Desktop/Research_Phd/DR/code-coherence-analysis/linsen/ConfigurationFiles/Acronyms.txt";
 	// String abbreviationsFilePath = "/Users/Kamonphop/Desktop/Research_Phd/DR/code-coherence-analysis/linsen/ConfigurationFiles/Abbreviations.txt";
 	// String targetFileExtensions = "java";
+
+    String outputDictionary = ResourceBundle.getBundle("ConfigurationDictionaryforSimilarSplit").getString("output_dictionary");
+    String[] pathDictionary = ResourceBundle.getBundle("ConfigurationDictionaryforSimilarSplit").getString("path_token_file_dictionary").split(";");
+      
+
+    List<String> externalDictionariesPaths = new LinkedList<String>();
+    for (String p : pathDictionary) {
+        if (!p.equals("")) {
+            externalDictionariesPaths.add(p);
+        }
+    }
+    String rootProjectDictionary = ResourceBundle.getBundle("ConfigurationDictionaryforSimilarSplit").getString("root_project_dictionary");
+    String pathStopWordsDictionary = ResourceBundle.getBundle("ConfigurationDictionaryforSimilarSplit").getString("path_stopwords_dictionary");
+    String extensionIndexing = ResourceBundle.getBundle("ConfigurationDictionaryforSimilarSplit").getString("extension_indexing_file");
+    String pathAcronyms = ResourceBundle.getBundle("ConfigurationDictionaryforSimilarSplit").getString("acronyms_file");
+    String pathAbbreviations = ResourceBundle.getBundle("ConfigurationTestSet").getString("abbreviations_file");
 
 
 	// String[] pathDictionary = dictionaries.split(";");
@@ -84,15 +102,16 @@ public class TestMain
 	//   			externalDictionariesPaths.add(p);
 	// 	}
 	// }
-	// HashSet<String> stopWords = new HashSet();
-	// HashSet<String> potentialAbbreviations = new HashSet();
+	HashSet<String> stopWords = new HashSet<String>();
+	HashSet<String> potentialAbbreviations = new HashSet<String>();
 
-	// Analyzer identifierAnalyzerNormalizer = new IdentifierAnalyzerNormalizer(pathStopWords);
-	// Analyzer whiteSpaceAnalyzer = new WhitespaceAnalyzer();
+	Analyzer identifierAnalyzerNormalizer = new IdentifierAnalyzerNormalizer(pathStopWordsDictionary);
+	Analyzer whiteSpaceAnalyzer = new WhitespaceAnalyzer();
 
 
-	// IndexLucene tempIndex = new IndexLucene(identifierAnalyzerNormalizer, whiteSpaceAnalyzer, outputIndex, externalDictionariesPaths, rootProject, acronymsFilePath, abbreviationsFilePath, targetFileExtensions, potentialAbbreviations, new HashMap(), new HashMap(), false, false);
-	// // tempIndex.deleteIndex();
+	IndexLucene tempIndex = new IndexLucene(identifierAnalyzerNormalizer, whiteSpaceAnalyzer, outputDictionary, externalDictionariesPaths, rootProjectDictionary, pathAcronyms, pathAbbreviations, extensionIndexing, potentialAbbreviations, new HashMap(), new HashMap(), false, false);
+    System.out.println("DEBUG --> Index exists: "+tempIndex.getAllIndexedFiles().toString());
+    tempIndex.deleteIndex();
 	// List<String> allFile2 = tempIndex.getAllIndexedFiles();
  //    System.out.println("Index exists: "+allFile2.toString());
 
@@ -106,6 +125,10 @@ public class TestMain
     // String targetFilePathToAnalyse = target_file_path;
     // String targetIdentifersFilePath= target_identifiers_list;
     // String rootReportFolderPath = root_report;
+
+    System.out.println("-------------------------Now creating the splitter object--------------------------------");
+
+    CompositeSplit splitter = SplitTokenModuleFactory.createPatternMatchingSplittingModule();
 
 	String targetFileName = targetFilePathToAnalyse.substring(targetFilePathToAnalyse.lastIndexOf('/') + 1, targetFilePathToAnalyse.lastIndexOf('.'));
     

@@ -224,6 +224,7 @@ class LINSENnormalizer:
         os.chdir(LINSEN_MAIN_FOLDER)
         command = LINSEN_CMD.format(cp=CLASSPATH, wd=LINSEN_MAIN_FOLDER, jclass=LINSEN_MAIN_CLASS)
         print("+++"*30)
+        print("Running LINSEN")
         with subprocess.Popen(args=shlex_split(command), stdout=PIPE) as proc:
             # from pprint import pprint
             # pprint(proc.stderr.read())
