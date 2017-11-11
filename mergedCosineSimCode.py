@@ -1,17 +1,20 @@
 import nltk, string
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn import *
 from nltk.corpus import wordnet as wn
 import re
 import csv
 import gensim
 import numpy as np
+import pickle
+import scipy as sp
 
 # nltk.download('wordnet')
 # nltk.download('punkt') # if necessary...
 document1 = "This code prints hello world to the console"
 document2 = "int helloWorld(){ (\" hi world \"); "
 java_keyword = ['abstract','assert','boolean','break','byte','case','catch','char','class','const','continue','default','double','else','enum','extends','final','finally','float','for','if','implements','import','instanceof','int','interface','long','new','package','private','protected','public','return','short','static','super','switch','synchronized','this','throw','throws','transient','try','void','volatile','while']
-
+label_dict = pickle.load(open( "save.p", "rb" ))
 
 '''
 document3 = "This codes increase number with 1"
@@ -210,9 +213,9 @@ def runCosineSim(document1,document2):
 
 def runRawCosineSim(document1,document2):
     raw_res_cosine = raw_cosine_sim(document1, document2)
-    if raw_res_cosine == 0:
-        print(document1)
-        print(document2)
+    #if raw_res_cosine == 0:
+    #    print(document1)
+    #    print(document2)
 
     return raw_res_cosine
 
@@ -231,24 +234,32 @@ def runCosineSimWord2Vec(document1,document2,model1,model2):
     result_vec_comment = np.zeros(shape=(100,))
     for word in document2:
         try:
-            word_vec = model2[word]
+            word_vec = model1[word]
         except KeyError:
             word_vec = 0
         result_vec_comment = np.add(result_vec_comment, word_vec)
 
-        result_vec_comment = np.divide(result_vec_comment, len(document2))
+    result_vec_comment = np.divide(result_vec_comment, len(document2))
 
-    numerator = np.dot(result_vec_code,result_vec_comment)
-    dinominator = np.multiply(np.linalg.norm(result_vec_code),np.linalg.norm(result_vec_comment))
+    #numerator = np.dot(result_vec_code,result_vec_comment)
+    #dinominator = np.multiply(np.linalg.norm(result_vec_code),np.linalg.norm(result_vec_comment))
 
-    cosine_similar= float(numerator/dinominator)
+    #cosine_similar= float(numerator/dinominator)
+    #cosine_similar = 1 - sp.spatial.distance.cosine(result_vec_code,result_vec_comment)
+
+    #vectorizer = TfidfVectorizer()
+
+    #tfidf_code = vectorizer.fit_transform(result_vec_code)
+    #tfidf_comment = vectorizer.fit_transform(result_vec_comment)
+
+    cosine_similar = cosine_similarity(result_vec_code,result_vec_comment)
 
     return cosine_similar
 
 if __name__=="__main__":
     resCosineValList = []
     resRawCosineValList = []
-    with open("/Users/prathameshnaik/PycharmProjects/DR_Code/tp") as f:
+    with open("/Users/prathameshnaik/PycharmProjects/DR_Code/code_comments/Benchmark_Raw_Data.txt") as f:
         lines = f.readlines()
 
         codeList, commentList = getPair(lines)
@@ -267,16 +278,22 @@ if __name__=="__main__":
             sentences = sentences + i
 
         model2 = gensim.models.Word2Vec(sentences, size=100, window=5, min_count=5, workers=4)
-
+        f1 = open("coherent.txt", "a")
+        f2 = open("non_coherent.txt", "a")
 
         for i,j in zip(codeList,commentList):
             print('dataset :' ,cnt)
-            cnt = cnt + 1
             res_cosine = runCosineSim(i, j)
+            if str(cnt) in label_dict["COHERENT"]:
+                f1.write(str(res_cosine)+ ",")
+            else:
+                f2.write(str(res_cosine)+ ",")
+
             resCosineValList.append(res_cosine)
             raw_res_cosine = runRawCosineSim(i,j)
             resRawCosineValList.append(raw_res_cosine)
             res_cosine_word2vec = runCosineSimWord2Vec(i,j,model1,model2)
+            cnt = cnt + 1
 
             print("Raw value:",raw_res_cosine)
             print("Modified value using features:", res_cosine)
