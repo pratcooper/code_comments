@@ -106,6 +106,42 @@ def k_means(data_points,k,means,plot_flag,threshold):
         plot_graph(clusters, plot_flag)
         return clusters
 
+def pca(X = np.array([]), initial_dims = 50):
+    """
+    Runs PCA on the N x D array X in order to reduce its dimensionality to no_dims dimensions.
+
+    Inputs:
+    - X: An array with shape N x D where N is the number of examples and D is the
+         dimensionality of original data.
+    - initial_dims: A scalar indicates the output dimension of examples after performing PCA.
+
+    Returns:
+    - Y: An array with shape N x initial_dims where N is the number of examples and initial_dims is the
+         dimensionality of output examples. intial_dims should be smaller than D, which is the
+         dimensionality of original examples.
+    """
+
+    print "Preprocessing the data using PCA..."
+    
+    Y = np.zeros((X.shape[0],initial_dims))
+    
+    # start your code here
+
+    X = X - np.mean(X,axis=0)
+
+    Xt = np.transpose(X)
+    S = np.divide( Xt.dot(X), len(X))
+    w,v = np.linalg.eig(S)
+    zipped = sorted(zip(w,v), key=lambda x: x[0])[::-1]
+    lambdas, vectors = zip(*zipped)
+    uT = np.transpose(vectors[:initial_dims])
+    Y = np.dot(X,uT)
+
+    #print Y
+
+    return Y
+
+
 
 if __name__=="__main__":
 
@@ -127,10 +163,13 @@ if __name__=="__main__":
 
 
     ########################Update data points#####################################
-    f = open('/Users/prathameshnaik/PycharmProjects/DR_Code/Points.csv', 'r')
+    f = open('C:\\Users\\Kaushal\\Desktop\\DR\\code_comments\\Points.csv', 'r' , encoding='utf-8')
     reader = csv.reader(f, delimiter=",")
     for line in reader:
+        if(len(line)==0):
+            continue
         point = []  # tuples for point
+        #print(line, "LINE")
         point.append(float(line[2])) # feat1  = cosine_similarity
         point.append(float(line[3])) # feat2  = len of comment
         point.append(float(line[4])) # feat3  = readability of comment

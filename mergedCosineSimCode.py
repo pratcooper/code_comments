@@ -11,8 +11,8 @@ import scipy as sp
 from sklearn.metrics.pairwise import cosine_similarity
 from textstat.textstat import textstat
 
-# nltk.download('wordnet')
-# nltk.download('punkt') # if necessary...
+#nltk.download('wordnet')
+#nltk.download('punkt') # if necessary...
 document1 = "This code prints hello world to the console"
 document2 = "int helloWorld(){ (\" hi world \"); "
 java_keyword = ['abstract','assert','boolean','break','byte','case','catch','char','class','const','continue','default','double','else','enum','extends','final','finally','float','for','if','implements','import','instanceof','int','interface','long','new','package','private','protected','public','return','short','static','super','switch','synchronized','this','throw','throws','transient','try','void','volatile','while']
@@ -187,7 +187,7 @@ def runRawCosineSim(document1,document2):
 ##########################################################################
 def runCosineSimWord2Vec(document1,document2,model):
 
-    result_vec_code = np.zeros(shape=(100,))
+    result_vec_code = np.zeros(shape=(300,))
     count_comment_zero = 0
     count_code_zero = 0
     for word in document1:
@@ -200,7 +200,7 @@ def runCosineSimWord2Vec(document1,document2,model):
 
     result_vec_code = np.divide(result_vec_code,(len(document1) - count_code_zero))
 
-    result_vec_comment = np.zeros(shape=(100,))
+    result_vec_comment = np.zeros(shape=(300,))
     for word in document2:
         try:
             word_vec = model[word]
@@ -302,7 +302,7 @@ def create_list_var_api_returnvar(code,find_ret,find_var,find_api,find_method_na
 if __name__=="__main__":
     resCosineValList = []
     resRawCosineValList = []
-    with open("/Users/prathameshnaik/PycharmProjects/DR_Code/code_comments/Benchmark_Raw_Data.txt") as f:
+    with open("C:\\Users\\Kaushal\\Desktop\\DR\\code_comments\\Benchmark_Raw_Data.txt",encoding="utf8") as f:
         lines = f.readlines()
 
         codeList, commentList = getPair(lines)
@@ -316,26 +316,26 @@ if __name__=="__main__":
         #     sentences = sentences + i
         # model2 = gensim.models.Word2Vec(sentences, size=100, window=5, min_count=5, workers=4)
 
-        #model = gensim.models.KeyedVectors.load_word2vec_format('./GoogleNews-vectors-negative300.bin', binary=True)
+        model = gensim.models.KeyedVectors.load_word2vec_format('C:\\Users\\Kaushal\\Desktop\\DR\\GoogleNews-vectors-negative300.bin', binary=True)
         f1 = open("coherent.txt", "a")
         f2 = open("non_coherent.txt", "a")
-        feature_file = open('feature_file.txt', 'a')
-        with open("/Users/prathameshnaik/PycharmProjects/DR_Code/Points.csv", 'w') as f:
+        feature_file = open('feature_file.txt', 'a', encoding="utf8")
+        with open("C:\\Users\\Kaushal\\Desktop\\DR\\code_comments\\Points.csv", 'w',encoding="utf8") as f:
             wr = csv.writer(f, quoting=csv.QUOTE_ALL)
             for i,j in zip(codeList,commentList):
                 print('Data Point :' ,cnt)
                 #################### similarity functions ##############
                 res_cosine = runCosineSim(i, j)
                 raw_res_cosine = runRawCosineSim(i,j)
-                #res_cosine_word2vec = runCosineSimWord2Vec(i,j,model)
+                res_cosine_word2vec = runCosineSimWord2Vec(i,j,model)
                 resRawCosineValList.append(raw_res_cosine)
                 resCosineValList.append(res_cosine)
                 #################### Print similarity functions ######################
-                print("Raw Cosine Similarity value:",raw_res_cosine)
-                print("Modified Cosine Similarity using features:", res_cosine)
-                #print("Modified Cosine Similarity using word2vec:", res_cosine_word2vec)
-                print("-----------")
-                #########################get method name and comment similarity##############################
+                # print("Raw Cosine Similarity value:",raw_res_cosine)
+                # print("Modified Cosine Similarity using features:", res_cosine)
+                # #print("Modified Cosine Similarity using word2vec:", res_cosine_word2vec)
+                # print("-----------")
+                # #########################get method name and comment similarity##############################
                 a,b,c,method_name = create_list_var_api_returnvar(i,False,False,False,True)
                 method_comment_sim_score = 0
 
@@ -369,13 +369,13 @@ if __name__=="__main__":
                 score = score/float(num_of_metrics)
                 ######################################################################
                 if str(cnt) in label_dict["COHERENT"]:
-                    wr.writerow([cnt, "COHERENT", float(res_cosine), len(j),float(score),float(method_comment_sim_score)])
+                    wr.writerow([cnt, "COHERENT", float(res_cosine_word2vec), len(j),float(score),float(method_comment_sim_score)])
                 else:
-                    wr.writerow([cnt, "NON_COHERENT", float(res_cosine), len(j) ,float(score),float(method_comment_sim_score)])
+                    wr.writerow([cnt, "NON_COHERENT", float(res_cosine_word2vec), len(j) ,float(score),float(method_comment_sim_score)])
                 cnt = cnt + 1
 
             feature_file.close()
-    with open("/Users/prathameshnaik/PycharmProjects/DR_Code/data.csv",'w') as myfile:
+    with open("C:\\Users\\Kaushal\\Desktop\\DR\\code_comments\\data.csv",'w',encoding="utf8") as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
         for i,j in zip(resCosineValList,resRawCosineValList):
             wr.writerow([float(i),float(j)])

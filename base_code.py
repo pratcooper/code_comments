@@ -1,9 +1,9 @@
 import math
 #"fsdf"
 
-document1 = "The game of life is a game of everlasting learning"
+document1 = "This code prints Hello World to the console"
 
-document2 = "The unexamined life is not worth living"
+document2 = "public static void printHello(){ System.out.println(\"Hello world\"); "
 
 document3 = "Never stop learning"
 
