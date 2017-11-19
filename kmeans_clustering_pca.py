@@ -180,7 +180,7 @@ if __name__=="__main__":
     ###################### Parameters for kmeans function ########################
     threshold = 0.01
     plot_flag = True
-    k = 3
+    k = 2
     ##############################################################################
 
     print("Printing data points :" ,data_points)
