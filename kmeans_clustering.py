@@ -1,7 +1,7 @@
 import csv
 import math
 import matplotlib.pyplot as plt
-import numpy as np
+
 
 def plot_graph(clusters, plot_flag):
     if plot_flag:
@@ -30,7 +30,7 @@ def assign_points(data_points, means):
         dist = []
         # find the best cluster for this node
         for mean in means:
-            dist.append(math.sqrt(math.pow(float(point[0]) - float(mean[0]), 2.0) + math.pow(float(point[1]) - float(mean[1]), 2.0)))
+            dist.append(math.sqrt(math.pow(float(point[0]) - float(mean[0]), 2.0) + math.pow(float(point[1]) - float(mean[1]), 2.0)+ math.pow(float(point[2]) - float(mean[2]), 2.0)+ math.pow(float(point[3]) - float(mean[3]), 2.0)))
         # let's find the smallest mean
         cnt_ = 0
         index = 0
@@ -52,11 +52,14 @@ def compute_mean(clusters):
         for point in cluster:
             mean_point[0] += float(point[0])
             mean_point[1] += float(point[1])
-            
+            mean_point[2] += float(point[2])
+            mean_point[3] += float(point[3])
             cnt += 1.0
 
         mean_point[0] = mean_point[0] / cnt
         mean_point[1] = mean_point[1] / cnt
+        mean_point[2] = mean_point[2] / cnt
+        mean_point[3] = mean_point[3] / cnt
         means.append(mean_point)
     return means
 
@@ -65,7 +68,7 @@ def update_means(old_means ,new_means, threshold):
     for i in range(len(old_means)):
         mean_1 = old_means[i]
         mean_2 = new_means[i]
-        diff = math.sqrt(math.pow(mean_1[0] - mean_2[0], 2.0) + math.pow(mean_1[1] - mean_2[1], 2.0))
+        diff = math.sqrt(math.pow(mean_1[0] - mean_2[0], 2.0) + math.pow(mean_1[1] - mean_2[1], 2.0)+ math.pow(mean_1[2] - mean_2[2], 2.0) + math.pow(mean_1[3] - mean_2[3], 2.0))
         print("diff between prev and curr mean :" ,diff)
         if diff > threshold:
             return False
@@ -103,42 +106,6 @@ def k_means(data_points,k,means,plot_flag,threshold):
         plot_graph(clusters, plot_flag)
         return clusters
 
-def pca(X = np.array([]), initial_dims = 2):
-    """
-    Runs PCA on the N x D array X in order to reduce its dimensionality to no_dims dimensions.
-
-    Inputs:
-    - X: An array with shape N x D where N is the number of examples and D is the
-         dimensionality of original data.
-    - initial_dims: A scalar indicates the output dimension of examples after performing PCA.
-
-    Returns:
-    - Y: An array with shape N x initial_dims where N is the number of examples and initial_dims is the
-         dimensionality of output examples. intial_dims should be smaller than D, which is the
-         dimensionality of original examples.
-    """
-
-    print ("Preprocessing the data using PCA...")
-    
-    Y = np.zeros((X.shape[0],initial_dims))
-    
-    # start your code here
-
-    X = X - np.mean(X,axis=0)
-
-    Xt = np.transpose(X)
-    S = np.divide( Xt.dot(X), len(X))
-    w,v = np.linalg.eig(S)
-    zipped = sorted(zip(w,v), key=lambda x: x[0])[::-1]
-    lambdas, vectors = zip(*zipped)
-    uT = np.transpose(vectors[:initial_dims])
-    Y = np.dot(X,uT)
-
-    #print Y
-
-    return Y
-
-
 
 if __name__=="__main__":
 
@@ -172,15 +139,13 @@ if __name__=="__main__":
         point.append(float(line[4])) # feat3  = readability of comment
         point.append(float(line[5])) # feat4  = similarity between comment and Method name
         data_points.append(point)
-
-    data_points = pca(np.asarray(data_points))
     ###############################################################################
 
 
     ###################### Parameters for kmeans function ########################
     threshold = 0.01
     plot_flag = True
-    k = 3
+    k = 2
     ##############################################################################
 
     print("Printing data points :" ,data_points)
