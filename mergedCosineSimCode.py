@@ -11,6 +11,16 @@ import scipy as sp
 from sklearn.metrics.pairwise import cosine_similarity
 from textstat.textstat import textstat
 
+
+
+
+### For Glove
+
+###
+
+
+
+
 #nltk.download('wordnet')
 #nltk.download('punkt') # if necessary...
 document1 = "This code prints hello world to the console"
@@ -316,7 +326,7 @@ if __name__=="__main__":
         #     sentences = sentences + i
         # model2 = gensim.models.Word2Vec(sentences, size=100, window=5, min_count=5, workers=4)
 
-        model = gensim.models.KeyedVectors.load_word2vec_format('C:\\Users\\Kaushal\\Desktop\\DR\\GoogleNews-vectors-negative300.bin', binary=True)
+        model = gensim.models.KeyedVectors.load_word2vec_format('C:\\Users\\Kaushal\\Desktop\\DR\\code_comments\\code_comments_w2v.bin', binary=True)
         f1 = open("coherent.txt", "a")
         f2 = open("non_coherent.txt", "a")
         feature_file = open('feature_file.txt', 'a', encoding="utf8")

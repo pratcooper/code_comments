@@ -2,6 +2,8 @@ import csv
 import math
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy import array
+from sklearn.cluster import KMeans
 
 def plot_graph(clusters, plot_flag):
     if plot_flag:
@@ -13,11 +15,14 @@ def plot_graph(clusters, plot_flag):
         ## third arg : c = colors[cnt]
         cnt = 4
         for cluster in clusters.values():
+            #print (cluster, " jianjsdnfckjsdbf")
             feat1 = []
             feat2 = []
             for point in cluster:
+                #print (point, "point")
                 feat1.append(point[0]) ### feat 1  = cosine_sim
                 feat2.append(point[1]) ### feat 2  = len of comment
+
                 #feat2.append(point[2]) ### feat 3  = readability of comment
                 #feat2.append(point[2]) ### feat 4  = similarity between comment and Method name
             ax.scatter(feat2, feat1, s=60 ,c = colors[cnt])
@@ -78,40 +83,65 @@ def print_means(means):
         print("%f %f %f %f" % (point[0], point[1], point[2], point[3]))
 
 def k_means(data_points,k,means,plot_flag,threshold):
-        clusters = dict()
-        if len(data_points) < k:
-            return -1  # error
-        #### means is initial mean set #####
-        stop = False
-        iter = 1
-        old_means = means
-        print("Starting k means iterations.")
-        while not stop:
-            # assignment step: assign each node to the cluster with the closest mean
-            print("######iteration :" , iter, "completed###############################")
-            clusters = assign_points(data_points,old_means)
-            new_means = compute_mean(clusters)
-            print_means(new_means)
-            stop = update_means(old_means,new_means, threshold)
-            if not stop:
-                old_means = new_means
 
-            iter +=1
+        cluster = dict()
 
-        clusters = clusters
-        print("Convergence !!! Stoping k means algorithm.")
-        plot_graph(clusters, plot_flag)
-        return clusters
+        for i in range(k):
+            cluster[i] = []
+    
+        # tmp = np.asarray(data_points)
+        # data_points = tmp.reshape((48, 4))
+        # print(tmp.shape , " kasndksa")
+        tmp  = []
+        for i in range(len(data_points)):
+            tmp.append(data_points[i])
+        data_points = np.array(tmp)
 
-def pca(X = np.array([]), initial_dims = 2):
+        #print(data_points, "jnhkjhkhk454545454datapoint")
+
+        kmeans = KMeans(n_clusters=k, random_state=0).fit(data_points)
+        for i in range(len(data_points)):
+            print(data_points[i], "Before")
+            prediction = kmeans.predict(data_points[i].reshape(1,-1))
+            print(data_points[i], "After")
+            predictioni = prediction[0]
+            cluster[predictioni].append(data_points[i].tolist())
+           
+        
+
+
+        # clusters = dict()
+        # if len(data_points) < k:
+        #     return -1  # error
+        # #### means is initial mean set #####
+        # stop = False
+        # iter = 1
+        # old_means = means
+        # print("Starting k means iterations.")
+        # while not stop:
+        #     # assignment step: assign each node to the cluster with the closest mean
+        #     print("######iteration :" , iter, "completed###############################")
+        #     clusters = assign_points(data_points,old_means)
+        #     new_means = compute_mean(clusters)
+        #     print_means(new_means)
+        #     stop = update_means(old_means,new_means, threshold)
+        #     if not stop:
+        #         old_means = new_means
+
+        #     iter +=1
+
+        # clusters = clusters
+        # print("Convergence !!! Stoping k means algorithm.")
+        plot_graph(cluster, plot_flag)
+        return cluster
+
+def pca(X = np.array([]), initial_dims = 50):
     """
     Runs PCA on the N x D array X in order to reduce its dimensionality to no_dims dimensions.
-
     Inputs:
     - X: An array with shape N x D where N is the number of examples and D is the
          dimensionality of original data.
     - initial_dims: A scalar indicates the output dimension of examples after performing PCA.
-
     Returns:
     - Y: An array with shape N x initial_dims where N is the number of examples and initial_dims is the
          dimensionality of output examples. intial_dims should be smaller than D, which is the
@@ -124,17 +154,46 @@ def pca(X = np.array([]), initial_dims = 2):
     
     # start your code here
 
-    X = X - np.mean(X,axis=0)
+    X =  np.subtract(X, np.mean(X,axis=0))
 
-    Xt = np.transpose(X)
-    S = np.divide( Xt.dot(X), len(X))
+    # Xt = np.transpose(X)
+    # S = np.divide( Xt.dot(X), len(X))
+
+    # print(X.shape, " X shape")
+
+    S = np.cov(np.transpose(X))
+
+    # print(S.shape, "S shape")
+
     w,v = np.linalg.eig(S)
+
+    # print w[0], "Value"
+
+    # print v[:,0], "Vector"
+
+    # print(w.shape, "w shape")
+
+    # print(v.shape, "v shape")
+    #print w, "W"
+    #print v, "V"
+
+    v = np.transpose(v)
+
     zipped = sorted(zip(w,v), key=lambda x: x[0])[::-1]
     lambdas, vectors = zip(*zipped)
-    uT = np.transpose(vectors[:initial_dims])
-    Y = np.dot(X,uT)
 
-    #print Y
+    # print(len(vectors), " Vectors")
+    # print(len(vectors[0]), " Vectors")
+
+    #print(vectors[0:2])
+
+    u = np.array(vectors)[:50,:]
+    # print u.shape, "Shape of u"
+
+    Y = np.dot(X,np.transpose(u))
+
+    # print Y.shape, "Shape of Y"
+    # print Y
 
     return Y
 
@@ -143,6 +202,7 @@ def pca(X = np.array([]), initial_dims = 2):
 if __name__=="__main__":
 
     data_points = []
+
     clusters = dict()  # clusters of nodes
 
     ########################################################
@@ -155,7 +215,7 @@ if __name__=="__main__":
 
 
     ######### 0th point (For making same index as data set)#############################
-    data_points.append([0.1199,65,13.31,0.5023])
+    #data_points.append([0.1199,65,13.31,0.5023])
     ####################################################################################
 
 
@@ -171,6 +231,7 @@ if __name__=="__main__":
         point.append(float(line[3])) # feat2  = len of comment
         point.append(float(line[4])) # feat3  = readability of comment
         point.append(float(line[5])) # feat4  = similarity between comment and Method name
+        point.append(float(line[0]))
         data_points.append(point)
 
     data_points = pca(np.asarray(data_points))
@@ -180,7 +241,7 @@ if __name__=="__main__":
     ###################### Parameters for kmeans function ########################
     threshold = 0.01
     plot_flag = True
-    k = 2
+    k = 3
     ##############################################################################
 
     print("Printing data points :" ,data_points)
@@ -189,13 +250,16 @@ if __name__=="__main__":
 
     ######### Initialize means #####################################################################
     means = []  # means of clusters
-    means.append(data_points[46]) # non coherent
-    means.append(data_points[47]) # coherent
+    means.append(data_points[0]) # non coherent
+    means.append(data_points[1]) # coherent
 
     ################################################################################################
     clusters = k_means(data_points,k,means,plot_flag ,threshold)
     ################################################################################################
     print("Length of (CLUSTER 0):", len(clusters[0]))
     print("Length of (CLUSTER 1):", len(clusters[1]))
+
+    print("Length of (CLUSTER 1):", len(clusters[2]))
     print("(CLUSTER 0):" , clusters[0])
     print("(CLUSTER 1):" , clusters[1])
+    print("(CLUSTER 2):" , clusters[2])
